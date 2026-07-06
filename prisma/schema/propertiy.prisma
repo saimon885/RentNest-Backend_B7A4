@@ -1,0 +1,16 @@
+model Property {
+    id            String   @id @default(uuid())
+    title         String
+    description   String
+    location      String
+    pricePerMonth Int
+    amenities     String[]
+    images        String[]
+    isAvailable   Boolean  @default(true)
+    categoryId    String
+    category      Category @relation(fields: [categoryId], references: [id])
+    landlordId    String?
+    landLord      Users?   @relation(fields: [landlordId], references: [id])
+
+    @@map("properties")
+}
