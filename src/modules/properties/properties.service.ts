@@ -25,10 +25,22 @@ const getAllPropertyCategoriesDB = async () => {
 };
 
 const getAllPropertiesDB = async () => {
-  // Logic to get all properties from the database
+  const result = await prisma.property.findMany();
+  return result;
 };
 const getSinglePropertyDB = async (propertyId: string) => {
-  // Logic to get a single property from the database
+  const result = await prisma.property.findUnique({
+    where: {
+      id: propertyId,
+    },
+    include: {
+      category: true,
+    },
+  });
+  if (!result) {
+    throw new Error("Property Not found!");
+  }
+  return result;
 };
 
 export const propertyService = {

@@ -11,6 +11,6 @@ router.post(
   propertyController.createPropertyCategory,
 );
 router.get("/categories", propertyController.getAllPropertyCategories);
-router.get("/properties", propertyController.getProperties);
-router.get("/properties/:id", propertyController.getSingleProperty);
+router.get("/", propertyController.getProperties);
+router.get("/:id", propertyController.getSingleProperty);
 export const propertyRoutes = router;

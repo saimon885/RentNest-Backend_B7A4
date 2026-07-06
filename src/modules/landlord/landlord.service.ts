@@ -1,7 +1,11 @@
 import { prisma } from "../../lib/prisma";
-import { IcreateProperty } from "./landlord.interface";
+import { IcreateProperty, IupdateProperty } from "./landlord.interface";
 
-const createPropertyDB = async (payload: IcreateProperty, userId: string) => {
+const createPropertyDB = async (
+  payload: IcreateProperty,
+  userId: string,
+  isLandlord: boolean,
+) => {
   const {
     title,
     description,
@@ -11,6 +15,9 @@ const createPropertyDB = async (payload: IcreateProperty, userId: string) => {
     images,
     categoryId,
   } = payload;
+  if (!isLandlord) {
+    throw new Error("You are not a Landlord!");
+  }
   const result = await prisma.property.create({
     data: {
       title,
@@ -29,11 +36,57 @@ const createPropertyDB = async (payload: IcreateProperty, userId: string) => {
 
   return result;
 };
-const updatePropertyDB = async (propertyId: string, propertyData: any) => {
-  // Logic to update a property in the database
+
+const updatePropertyDB = async (
+  propertyId: string,
+  payload: IupdateProperty,
+  landLordId: string,
+  isLandlord: boolean,
+) => {
+  const property = await prisma.property.findUnique({
+    where: {
+      id: propertyId,
+    },
+  });
+  if (!property) {
+    throw new Error("Property not found!");
+  }
+  if (!isLandlord || property.landlordId !== landLordId) {
+    throw new Error("You are not a Owner of Property!");
+  }
+  const result = await prisma.property.update({
+    where: {
+      id: propertyId,
+    },
+    data: {
+      ...payload,
+    },
+  });
+  return result;
 };
-const deletePropertyDB = async (propertyId: string) => {
-  // Logic to delete a property from the database
+
+const deletePropertyDB = async (
+  propertyId: string,
+  landLordId: string,
+  isLandlord: boolean,
+) => {
+  const property = await prisma.property.findUnique({
+    where: {
+      id: propertyId,
+    },
+  });
+  if (!property) {
+    throw new Error("Property Not Found!");
+  }
+  if (!isLandlord || property.landlordId !== landLordId) {
+    throw new Error("You are not a Owner of Property!");
+  }
+  const result = await prisma.property.delete({
+    where: {
+      id: propertyId,
+    },
+  });
+  return result;
 };
 const getRequestDB = async (requestId: string) => {
   // Logic to get a request from the database
