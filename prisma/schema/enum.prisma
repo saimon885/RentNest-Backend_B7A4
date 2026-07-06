@@ -1,0 +1,5 @@
+enum Role {
+    LANDLORD
+    TENANT
+    ADMIN
+}
