@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { authServices } from "./auth.service";
-import { cathcAsync } from "../../utils/CathcAsync";
+import { catchAsync } from "../../utils/CathcAsync";
 
-const createUserHandler = cathcAsync(async (req: Request, res: Response) => {
+const createUserHandler = catchAsync(async (req: Request, res: Response) => {
   const body = req.body;
   const result = await authServices.createUserDB(body);
   res.status(httpStatus.CREATED).json({
@@ -12,7 +12,7 @@ const createUserHandler = cathcAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const loginUserHandler = cathcAsync(async (req: Request, res: Response) => {
+const loginUserHandler = catchAsync(async (req: Request, res: Response) => {
   const body = req.body;
   const result = await authServices.loginUserDB(body);
   res.cookie("accessToken", result.accessToken, {
@@ -27,7 +27,7 @@ const loginUserHandler = cathcAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const myProfileHandler = cathcAsync(async (req: Request, res: Response) => {
+const myProfileHandler = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
   const result = await authServices.myProfileDB(userId);
   res.status(httpStatus.OK).json({

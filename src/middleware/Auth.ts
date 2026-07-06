@@ -49,11 +49,11 @@ export const Auth = (...requireRoles: string[]) => {
       }
       req.user = user;
       next();
-    } catch (err: any) {
+    } catch (err) {
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Authentication failed",
-        error: err,
+        error: err instanceof Error ? err.message : "Unknown error",
       });
     }
   };
