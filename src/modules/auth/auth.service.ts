@@ -1,8 +1,10 @@
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import config from "../../config";
-const createUserDB = async (payload: any) => {
+import { IcreateUser, IloginUser } from "./auth.interface";
+
+const createUserDB = async (payload: IcreateUser) => {
   const { name, email, password, role } = payload;
   const allowedRoles = ["LANDLORD", "TENANT"];
 
@@ -26,7 +28,7 @@ const createUserDB = async (payload: any) => {
   });
   return user;
 };
-const loginUserDB = async (payload: any) => {
+const loginUserDB = async (payload: IloginUser) => {
   const { email, password } = payload;
   const user = await prisma.users.findUnique({
     where: { email },
@@ -49,7 +51,21 @@ const loginUserDB = async (payload: any) => {
   } as SignOptions);
   return { user, accessToken };
 };
-const myProfileDB = async (payload: any) => {};
+const myProfileDB = async (userId: string) => {
+  const user = await prisma.users.findUnique({
+    where: {
+      id: userId,
+    },
+    omit: {
+      password: true,
+    },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
+};
+
 export const authServices = {
   createUserDB,
   loginUserDB,

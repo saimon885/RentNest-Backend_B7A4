@@ -27,7 +27,15 @@ const loginUserHandler = cathcAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const myProfileHandler = cathcAsync(async (req: Request, res: Response) => {});
+const myProfileHandler = cathcAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await authServices.myProfileDB(userId);
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "User profile retrieved successfully",
+    data: result,
+  });
+});
 export const authController = {
   createUserHandler,
   loginUserHandler,
