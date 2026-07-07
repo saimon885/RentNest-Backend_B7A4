@@ -21,7 +21,7 @@ router.delete(
   landlordController.deleteProperty,
 );
 router.get("/requests", Auth(Role.LANDLORD), landlordController.getRequest);
-router.put(
+router.patch(
   "/requests/:id",
   Auth(Role.LANDLORD),
   landlordController.updateRequest,

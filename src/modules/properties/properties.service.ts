@@ -25,7 +25,14 @@ const getAllPropertyCategoriesDB = async () => {
 };
 
 const getAllPropertiesDB = async () => {
-  const result = await prisma.property.findMany();
+  const result = await prisma.property.findMany({
+    omit: {
+      categoryId: true,
+    },
+    include: {
+      category: true,
+    },
+  });
   return result;
 };
 const getSinglePropertyDB = async (propertyId: string) => {

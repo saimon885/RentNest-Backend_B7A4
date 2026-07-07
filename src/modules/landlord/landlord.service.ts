@@ -1,6 +1,9 @@
+import { ReqStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { IcreateProperty, IupdateProperty } from "./landlord.interface";
-
+interface IUpdateRequest {
+  status: ReqStatus;
+}
 const createPropertyDB = async (
   payload: IcreateProperty,
   userId: string,
@@ -88,8 +91,13 @@ const deletePropertyDB = async (
   });
   return result;
 };
-const getRequestDB = async () => {
+const getLandlordRequestsDB = async (landlordId: string) => {
   const result = await prisma.rentalRequest.findMany({
+    where: {
+      property: {
+        landlordId: landlordId,
+      },
+    },
     omit: {
       createdAt: true,
       updatedAt: true,
@@ -99,16 +107,50 @@ const getRequestDB = async () => {
       property: true,
     },
   });
+  if (result.length === 0) {
+    throw new Error("not Available Request. please add Properties.");
+  }
   return result;
 };
-const updateRequestDB = async (requestId: string, requestData: any) => {
-  
+const updateRequestDB = async (
+  requestId: string,
+  requestData: IUpdateRequest,
+  loginLandlordId: string,
+) => {
+  const rentalRequest = await prisma.rentalRequest.findUnique({
+    where: { id: requestId },
+    include: {
+      property: true,
+    },
+  });
+
+  if (!rentalRequest) {
+    throw new Error("Rental Request not Found!");
+  }
+
+  if (rentalRequest.property.landlordId !== loginLandlordId) {
+    throw new Error(
+      "You are not the owner of this property. You cannot update this request!",
+    );
+  }
+  const result = await prisma.rentalRequest.update({
+    where: {
+      id: requestId,
+    },
+    data: {
+      status: requestData.status,
+    },
+  });
+  if (result.id !== requestId) {
+    throw new Error("Request not Found!");
+  }
+  return result;
 };
 
 export const landlordService = {
   createPropertyDB,
   updatePropertyDB,
   deletePropertyDB,
-  getRequestDB,
+  getLandlordRequestsDB,
   updateRequestDB,
 };
