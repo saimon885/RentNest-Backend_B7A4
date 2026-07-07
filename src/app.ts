@@ -5,6 +5,7 @@ import { LandlordRoutes } from "./modules/landlord/landlord.routes";
 import { propertyRoutes } from "./modules/properties/properties.routes";
 import { globalErrorHandler } from "./middleware/globalErrorHandler";
 import { RentalRoutes } from "./modules/rental/rental.routes";
+import { adminRoutes } from "./modules/admin/admin.routes";
 const app: Application = express();
 
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/landlord", LandlordRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/rentals", RentalRoutes);
+app.use("/api/admin",adminRoutes)
 
 app.use(globalErrorHandler);
 export default app;
