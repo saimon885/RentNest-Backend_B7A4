@@ -50,7 +50,14 @@ const deleteProperty = catchAsync(async (req: Request, res: Response) => {
     data: null,
   });
 });
-const getRequest = catchAsync(async (req: Request, res: Response) => {});
+const getRequest = catchAsync(async (req: Request, res: Response) => {
+  const result = await landlordService.getRequestDB();
+  res.status(httpstatus.OK).json({
+    success: true,
+    message: "all request retrive successfully",
+    data: result,
+  });
+});
 const updateRequest = catchAsync(async (req: Request, res: Response) => {});
 export const landlordController = {
   createProperty,

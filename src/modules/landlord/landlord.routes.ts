@@ -20,7 +20,7 @@ router.delete(
   Auth(Role.LANDLORD),
   landlordController.deleteProperty,
 );
-router.get("/requests/:id", Auth(Role.LANDLORD), landlordController.getRequest);
+router.get("/requests", Auth(Role.LANDLORD), landlordController.getRequest);
 router.put(
   "/requests/:id",
   Auth(Role.LANDLORD),

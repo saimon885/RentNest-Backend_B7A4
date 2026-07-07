@@ -88,11 +88,21 @@ const deletePropertyDB = async (
   });
   return result;
 };
-const getRequestDB = async (requestId: string) => {
-  // Logic to get a request from the database
+const getRequestDB = async () => {
+  const result = await prisma.rentalRequest.findMany({
+    omit: {
+      createdAt: true,
+      updatedAt: true,
+      propertyId: true,
+    },
+    include: {
+      property: true,
+    },
+  });
+  return result;
 };
 const updateRequestDB = async (requestId: string, requestData: any) => {
-  // Logic to update a request in the database
+  
 };
 
 export const landlordService = {
