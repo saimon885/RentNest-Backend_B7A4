@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma";
+import { IUserBannedPayload } from "./admin.interface";
 
 const getAllUserDB = async () => {
   const result = await prisma.users.findMany({
@@ -8,14 +9,17 @@ const getAllUserDB = async () => {
   });
   return result;
 };
+
 const getAllProperties = async () => {
   const result = await prisma.property.findMany();
   return result;
 };
+
 const getAllRentals = async () => {
   const result = await prisma.rentalRequest.findMany();
   return result;
 };
+
 const getAllStates = async () => {
   const transactionResult = await prisma.$transaction(async (tx) => {
     const [
@@ -59,7 +63,41 @@ const getAllStates = async () => {
   });
   return transactionResult;
 };
-const updateUserBannedReq = () => {};
+
+const updateUserBannedReq = async (
+  userId: string,
+  payload: IUserBannedPayload,
+  adminId: string,
+) => {
+  const user = await prisma.users.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!user) {
+    throw new Error("User not found!");
+  }
+  if (user.id === adminId) {
+    throw new Error("You cannot ban yourself!");
+  }
+  if (user.role === "ADMIN") {
+    throw new Error("You cannot ban another Admin!");
+  }
+  if (user.isBanned === payload.isBanned) {
+    throw new Error(
+      `User is already ${payload.isBanned ? "Banned" : "UnBanned"}!`,
+    );
+  }
+  const result = await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      isBanned: payload.isBanned,
+    },
+  });
+  return result;
+};
 export const adminService = {
   getAllUserDB,
   getAllProperties,

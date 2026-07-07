@@ -37,7 +37,20 @@ const getAllStates = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateUser = catchAsync((req: Request, res: Response) => {});
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const adminId = req.user.id;
+  const result = await adminService.updateUserBannedReq(
+    userId as string,
+    req.body,
+    adminId,
+  );
+  res.status(httpStatus.OK).json({
+    success: true,
+    message: "user BannedStatus Update successfully",
+    data: result,
+  });
+});
 
 export const adminController = {
   getAllUser,
