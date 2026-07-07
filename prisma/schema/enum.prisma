@@ -3,3 +3,10 @@ enum Role {
     TENANT
     ADMIN
 }
+
+enum ReqStatus {
+    PENDING
+    APPROVED
+    REJECT
+    COMPLETED
+}
