@@ -25,7 +25,7 @@ const getAllPropertyCategories = catchAsync(
   },
 );
 const getProperties = catchAsync(async (req: Request, res: Response) => {
-  const result = await propertyService.getAllPropertiesDB();
+  const result = await propertyService.getAllPropertiesDB(req.query);
   res.status(HttpStatus.OK).json({
     success: true,
     message: "All Property retrieved successfully",

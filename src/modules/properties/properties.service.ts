@@ -1,4 +1,6 @@
+import { PropertyWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { IqueryInterface } from "./propreties.interface";
 
 const createPropertyCategoryDB = async (categoryData: { name: string }) => {
   const { name } = categoryData;
@@ -24,8 +26,62 @@ const getAllPropertyCategoriesDB = async () => {
   return result;
 };
 
-const getAllPropertiesDB = async () => {
+const getAllPropertiesDB = async (query: IqueryInterface) => {
+  const sortBy = query.sortBy ? query.sortBy : "pricePerMonth";
+  const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+  const andConditions: PropertyWhereInput[] = [];
+
+  if (query?.searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          title: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query.searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (query?.location) {
+    andConditions.push({
+      location: {
+        contains: query.location,
+        mode: "insensitive",
+      },
+    });
+  }
+
+  if (query?.minPrice || query?.maxPrice) {
+    andConditions.push({
+      pricePerMonth: {
+        gte: query.minPrice ? Number(query.minPrice) : undefined,
+        lte: query.maxPrice ? Number(query.maxPrice) : undefined,
+      },
+    });
+  }
+
+  if (query?.categoryId) {
+    andConditions.push({
+      categoryId: query.categoryId,
+    });
+  }
+
+  const whereConditions =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
   const result = await prisma.property.findMany({
+    where: whereConditions,
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
     omit: {
       categoryId: true,
     },
@@ -33,8 +89,10 @@ const getAllPropertiesDB = async () => {
       category: true,
     },
   });
+
   return result;
 };
+
 const getSinglePropertyDB = async (propertyId: string) => {
   const result = await prisma.property.findUnique({
     where: {
