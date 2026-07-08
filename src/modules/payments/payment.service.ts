@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import config from "../../config";
+import { PaymentStatus, ReqStatus } from "../../../generated/prisma/enums";
 
 const createPaymentStripeDB = async (rentalReqId: string): Promise<any> => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -43,7 +44,7 @@ const createPaymentStripeDB = async (rentalReqId: string): Promise<any> => {
     payment_method_types: ["card"],
     customer_email: rentalRequest.tenant.email,
     mode: "payment",
-    success_url: `${config.app_url}/premium?success=true&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${config.app_url}/premium?success=true`,
     cancel_url: `${config.app_url}/payment?success=false`,
     metadata: {
       rentalRequestId: rentalReqId,
@@ -54,6 +55,54 @@ const createPaymentStripeDB = async (rentalReqId: string): Promise<any> => {
   return session.url;
 };
 
+const confirmPaymentStripeDB = async (
+  sessionId: string,
+  rentalReqId: string,
+  tenantId: string,
+  amount: number,
+) => {
+  const result = await prisma.$transaction(async (tx) => {
+    const payment = await tx.payment.create({
+      data: {
+        rentalRequestId: rentalReqId,
+        tenantId: tenantId,
+        amount: amount,
+        transactionId: sessionId,
+        status: PaymentStatus.COMPLETED,
+        paidAt: new Date(),
+      },
+    });
+
+    await tx.rentalRequest.update({
+      where: {
+        id: rentalReqId,
+      },
+      data: {
+        status: ReqStatus.COMPLETED,
+      },
+    });
+
+    const rentalRequest = await tx.rentalRequest.findUnique({
+      where: { id: rentalReqId },
+    });
+
+    if (rentalRequest?.propertyId) {
+      await tx.property.update({
+        where: {
+          id: rentalRequest.propertyId,
+        },
+        data: {
+          isAvailable: false,
+        },
+      });
+    }
+
+    return payment;
+  });
+
+  return result;
+};
 export const paymentServices = {
   createPaymentStripeDB,
+  confirmPaymentStripeDB,
 };

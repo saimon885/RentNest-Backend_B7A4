@@ -8,9 +8,11 @@ export default {
   port: process.env.PORT,
   databaseUrl: process.env.DATABASE_URL,
   app_url: process.env.APP_URL,
+  server_url: process.env.SERVER_URL,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET!,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET!,
   jwt_access_expire_in: process.env.JWT_ACCESS_EXPIRE_IN!,
   stripe_api_key: process.env.STRIPE_API_KEY!,
+  stripe_webhook_Secret: process.env.API_ENDPOINT_WEBHOOK_SECRET!,
 };

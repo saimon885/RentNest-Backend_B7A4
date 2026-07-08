@@ -5,5 +5,6 @@ import { paymentController } from "./payments.controller";
 
 const router = Router();
 router.post("/create", Auth(Role.TENANT), paymentController.createPayment);
+router.post("/confirm", paymentController.confirmPayment);
 
 export const paymentrRoutes = router;
