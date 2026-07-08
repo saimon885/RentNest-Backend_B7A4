@@ -10,5 +10,6 @@ model RentalRequest {
     property   Property @relation(fields: [propertyId], references: [id])
 
     tenantId String
-    tenant   Users  @relation(fields: [tenantId], references: [id])
+    tenant   Users    @relation(fields: [tenantId], references: [id])
+    payment  Payment?
 }

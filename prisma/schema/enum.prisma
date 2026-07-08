@@ -10,3 +10,9 @@ enum ReqStatus {
     REJECT
     COMPLETED
 }
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+}
