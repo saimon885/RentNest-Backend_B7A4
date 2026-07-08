@@ -1,9 +1,9 @@
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import config from "../../config";
-import { PaymentStatus, ReqStatus } from "../../../generated/prisma/enums";
+import { handleCheckOutComplete } from "./subscription.utils";
 
-const createPaymentStripeDB = async (rentalReqId: string): Promise<any> => {
+const createPaymentStripeDB = async (rentalReqId: string) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
     where: {
       id: rentalReqId,
@@ -55,52 +55,48 @@ const createPaymentStripeDB = async (rentalReqId: string): Promise<any> => {
   return session.url;
 };
 
-const confirmPaymentStripeDB = async (
-  sessionId: string,
-  rentalReqId: string,
-  tenantId: string,
-  amount: number,
-) => {
-  const result = await prisma.$transaction(async (tx) => {
-    const payment = await tx.payment.create({
-      data: {
-        rentalRequestId: rentalReqId,
-        tenantId: tenantId,
-        amount: amount,
-        transactionId: sessionId,
-        status: PaymentStatus.COMPLETED,
-        paidAt: new Date(),
-      },
-    });
+const confirmPaymentStripeDB = async (payload: Buffer, signature: string) => {
+  const endPointSecret = config.stripe_webhook_Secret;
+  try {
+    const event = await stripe.webhooks.constructEventAsync(
+      payload,
+      signature,
+      endPointSecret,
+    );
+    console.log("event", event);
 
-    await tx.rentalRequest.update({
-      where: {
-        id: rentalReqId,
-      },
-      data: {
-        status: ReqStatus.COMPLETED,
-      },
-    });
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as any;
 
-    const rentalRequest = await tx.rentalRequest.findUnique({
-      where: { id: rentalReqId },
-    });
+        const sessionId = session.id;
+        const rentalRequestId = session.metadata.rentalRequestId;
+        const tenantId = session.metadata.tenantId;
+        const amount = session.amount_total / 100;
 
-    if (rentalRequest?.propertyId) {
-      await tx.property.update({
-        where: {
-          id: rentalRequest.propertyId,
-        },
-        data: {
-          isAvailable: false,
-        },
-      });
+        await handleCheckOutComplete(
+          sessionId,
+          rentalRequestId,
+          tenantId,
+          amount,
+        );
+        break;
+      }
+      case "customer.subscription.updated": {
+        const paymentMethod = event.data.object;
+        break;
+      }
+      case "customer.subscription.deleted": {
+        const paymentMethod = event.data.object;
+        break;
+      }
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
-
-    return payment;
-  });
-
-  return result;
+  } catch (err: any) {
+    console.error(`Webhook Error: ${err.message}`);
+    throw err;
+  }
 };
 export const paymentServices = {
   createPaymentStripeDB,
