@@ -1,3 +1,5 @@
+import { ReqStatus } from "../../../generated/prisma/enums";
+
 export interface IcreateProperty {
   title: string;
   description: string;
@@ -14,4 +16,8 @@ export interface IupdateProperty {
   pricePerMonth?: number;
   amenities?: string[];
   images?: string[];
+}
+
+export interface IUpdateRequest {
+  status: ReqStatus;
 }

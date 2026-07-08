@@ -1,9 +1,10 @@
-import { ReqStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { IcreateProperty, IupdateProperty } from "./landlord.interface";
-interface IUpdateRequest {
-  status: ReqStatus;
-}
+import {
+  IcreateProperty,
+  IupdateProperty,
+  IUpdateRequest,
+} from "./landlord.interface";
+
 const createPropertyDB = async (
   payload: IcreateProperty,
   userId: string,

@@ -1,9 +1,6 @@
 import { prisma } from "../../lib/prisma";
-interface ICreateRequest {
-  propertyId: string;
-  startDate: string;
-  endDate: string;
-}
+import { ICreateRequest } from "./rental.interface";
+
 const createRentalRequestDB = async (
   payload: ICreateRequest,
   tenantId: string,
