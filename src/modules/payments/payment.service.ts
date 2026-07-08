@@ -98,7 +98,34 @@ const confirmPaymentStripeDB = async (payload: Buffer, signature: string) => {
     throw err;
   }
 };
+
+const getYourPaymentDB = async (tenantId: string) => {
+  const result = await prisma.payment.findMany({
+    where: {
+      tenantId: tenantId,
+    },
+  });
+  if (result.length === 0) {
+    throw new Error("Payment history not found for this tenant.");
+  }
+  return result;
+};
+const getYourSinglePaymentDB = async (tenantId: string, paymentId: string) => {
+  const result = await prisma.payment.findFirst({
+    where: {
+      id: paymentId,
+      tenantId: tenantId,
+    },
+  });
+  if (!result) {
+    throw new Error("Payment record not found or unauthorized access.");
+  }
+  return result;
+};
+
 export const paymentServices = {
   createPaymentStripeDB,
   confirmPaymentStripeDB,
+  getYourPaymentDB,
+  getYourSinglePaymentDB,
 };
