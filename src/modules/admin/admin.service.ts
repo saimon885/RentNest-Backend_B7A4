@@ -11,7 +11,12 @@ const getAllUserDB = async () => {
 };
 
 const getAllProperties = async () => {
-  const result = await prisma.property.findMany();
+  const result = await prisma.property.findMany({
+    include: {
+      category: true,
+      reviews: true,
+    },
+  });
   return result;
 };
 

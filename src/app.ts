@@ -9,6 +9,7 @@ import { RentalRoutes } from "./modules/rental/rental.routes";
 import { adminRoutes } from "./modules/admin/admin.routes";
 import { paymentrRoutes } from "./modules/payments/payments.routes";
 import config from "./config";
+import { reviewRoutes } from "./modules/reviews/reviews.routes";
 const app: Application = express();
 
 app.use(cors({ origin: config.app_url, credentials: true }));
@@ -28,6 +29,7 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/rentals", RentalRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentrRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.use(globalErrorHandler);
 export default app;

@@ -13,6 +13,7 @@ model Property {
     landLord      Users?   @relation(fields: [landlordId], references: [id])
 
     rentalRequest RentalRequest[]
+    reviews       Review[]
 
     @@map("properties")
 }

@@ -95,6 +95,7 @@ const getAllPropertiesDB = async (query: IqueryInterface) => {
     },
     include: {
       category: true,
+      reviews: true,
     },
   });
 

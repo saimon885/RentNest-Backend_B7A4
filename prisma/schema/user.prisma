@@ -10,4 +10,5 @@ model Users {
     Landlord      Property[]
     rentalRequest RentalRequest[]
     payment       Payment[]
+    reviews       Review[]
 }
