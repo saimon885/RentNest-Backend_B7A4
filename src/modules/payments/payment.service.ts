@@ -5,16 +5,10 @@ import { handleCheckOutComplete } from "./subscription.utils";
 
 const createPaymentStripeDB = async (rentalReqId: string) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
-    where: {
-      id: rentalReqId,
-    },
+    where: { id: rentalReqId },
     include: {
       property: true,
-      tenant: {
-        omit: {
-          password: true,
-        },
-      },
+      tenant: { omit: { password: true } },
     },
   });
 
@@ -25,17 +19,38 @@ const createPaymentStripeDB = async (rentalReqId: string) => {
     throw new Error("Your request status is not Approved!");
   }
 
-  const amount = rentalRequest.property.pricePerMonth;
+  const checkIn = new Date(rentalRequest.startDate);
+  const checkOut = new Date(rentalRequest.endDate);
+
+  const timeDiff = checkOut.getTime() - checkIn.getTime();
+  let totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+  if (totalDays <= 0) {
+    throw new Error("Invalid rental duration!");
+  }
+
+  let isCapped = false;
+  if (totalDays > 30) {
+    totalDays = 30;
+    isCapped = true;
+  }
+
+  const pricePerDay = Number(rentalRequest.property.pricePerMonth) / 30;
+  const calculatedAmount = Math.round(pricePerDay * totalDays);
+
+  const descriptionMessage = isCapped
+    ? `Advance payment for the first 30 days. Monthly rate: ৳${rentalRequest.property.pricePerMonth}`
+    : `Total ${totalDays} days rental. Monthly rate: ৳${rentalRequest.property.pricePerMonth}`;
 
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
         price_data: {
           currency: "bdt",
-          unit_amount: Number(amount) * 100,
+          unit_amount: calculatedAmount * 100,
           product_data: {
             name: rentalRequest.property.title,
-            description: rentalRequest.property.description || undefined,
+            description: descriptionMessage,
           },
         },
         quantity: 1,
@@ -54,7 +69,6 @@ const createPaymentStripeDB = async (rentalReqId: string) => {
 
   return session.url;
 };
-
 const confirmPaymentStripeDB = async (payload: Buffer, signature: string) => {
   const endPointSecret = config.stripe_webhook_Secret;
   try {

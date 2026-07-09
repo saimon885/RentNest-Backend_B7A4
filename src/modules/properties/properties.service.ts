@@ -4,6 +4,9 @@ import { IqueryInterface } from "./propreties.interface";
 
 const createPropertyCategoryDB = async (categoryData: { name: string }) => {
   const { name } = categoryData;
+  if (!name.trim()) {
+    throw new Error("Name is required");
+  }
   const existingCategory = await prisma.category.findUnique({
     where: {
       name: name,
@@ -90,12 +93,13 @@ const getAllPropertiesDB = async (query: IqueryInterface) => {
     orderBy: {
       [sortBy]: sortOrder,
     },
-    omit: {
-      categoryId: true,
-    },
     include: {
-      category: true,
-      reviews: true,
+      category: {
+        omit: {
+          id: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
@@ -106,6 +110,7 @@ const getSinglePropertyDB = async (propertyId: string) => {
   const result = await prisma.property.findUnique({
     where: {
       id: propertyId,
+      isAvailable: true,
     },
     include: {
       category: true,

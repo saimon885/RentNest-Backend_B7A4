@@ -3,6 +3,12 @@ import { IaddReview } from "./reviews.interface";
 
 const addReviewDB = async (payload: IaddReview, tenantId: string) => {
   const { comment, propertyId, rating } = payload;
+  if (!comment.trim()) {
+    throw new Error("Comment are required");
+  }
+  if (!rating || rating < 1 || rating > 5) {
+    throw new Error("Rating must be between 1 and 5");
+  }
 
   const isRented = await prisma.rentalRequest.findFirst({
     where: {

@@ -2,10 +2,13 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
 import config from "../../config";
-import { IcreateUser, IloginUser } from "./auth.interface";
+import { IcreateUser, IloginUser, IupdateUser } from "./auth.interface";
 
 const createUserDB = async (payload: IcreateUser) => {
   const { name, email, password, role } = payload;
+  if ([name, email, password].some((value) => !value.trim())) {
+    throw new Error("Required fields cannot be empty");
+  }
   const allowedRoles = ["LANDLORD", "TENANT"];
 
   if (!allowedRoles.includes(role)) {
@@ -30,6 +33,7 @@ const createUserDB = async (payload: IcreateUser) => {
 };
 const loginUserDB = async (payload: IloginUser) => {
   const { email, password } = payload;
+
   const user = await prisma.users.findUnique({
     where: { email },
   });
@@ -66,8 +70,28 @@ const myProfileDB = async (userId: string) => {
   return user;
 };
 
+const updateProfileDB = async (userId: string, payload: IupdateUser) => {
+  const { name } = payload;
+  if (!name?.trim()) {
+    throw new Error("Name is required");
+  }
+  const updateResult = await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      name,
+    },
+    omit: {
+      password: true,
+    },
+  });
+  return updateResult;
+};
+
 export const authServices = {
   createUserDB,
   loginUserDB,
   myProfileDB,
+  updateProfileDB,
 };

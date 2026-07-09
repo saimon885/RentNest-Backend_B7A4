@@ -11,4 +11,9 @@ router.get(
   Auth(Role.ADMIN, Role.LANDLORD, Role.TENANT),
   authController.myProfileHandler,
 );
+router.patch(
+  "/me/update",
+  Auth(Role.ADMIN, Role.LANDLORD, Role.TENANT),
+  authController.updateProfile,
+);
 export const authRoutes = router;

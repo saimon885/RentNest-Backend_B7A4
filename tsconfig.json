@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "target": "ES2023",
+    "target": "es2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "ignoreDeprecations": "6.0",
     "types": ["node"],
     "rootDir": "./",
-    "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
-    "skipLibCheck": false
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true
   },
-  // "include": ["src/**/*"],
+  "include": ["src/**/*", "generated/**/*"],
   "exclude": ["node_modules", "dist"]
 }

@@ -10,6 +10,7 @@ import { adminRoutes } from "./modules/admin/admin.routes";
 import { paymentrRoutes } from "./modules/payments/payments.routes";
 import config from "./config";
 import { reviewRoutes } from "./modules/reviews/reviews.routes";
+import { notFound } from "./middleware/NotFound";
 const app: Application = express();
 
 app.use(cors({ origin: config.app_url, credentials: true }));
@@ -31,5 +32,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentrRoutes);
 app.use("/api/reviews", reviewRoutes);
 
+app.use(notFound);
 app.use(globalErrorHandler);
 export default app;

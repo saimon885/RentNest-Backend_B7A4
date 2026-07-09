@@ -19,6 +19,26 @@ const createPropertyDB = async (
     images,
     categoryId,
   } = payload;
+
+  if (!title.trim() || !description.trim() || !location.trim()) {
+    throw new Error("Required fields cannot be empty");
+  }
+
+  if (pricePerMonth <= 0) {
+    throw new Error("Invalid price");
+  }
+
+  if (!amenities.length) {
+    throw new Error("Amenities are required");
+  }
+
+  if (!images.length) {
+    throw new Error("Images are required");
+  }
+
+  if (!categoryId.trim()) {
+    throw new Error("Category is required");
+  }
   if (!isLandlord) {
     throw new Error("You are not a Landlord!");
   }
@@ -41,6 +61,32 @@ const createPropertyDB = async (
   return result;
 };
 
+const getMyPropertyDb = async (landLordId: string) => {
+  const result = await prisma.property.findMany({
+    where: {
+      landlordId: landLordId,
+    },
+    include: {
+      category: {
+        omit: {
+          id: true,
+          createdAt: true,
+        },
+      },
+      reviews: true,
+      rentalRequest: {
+        omit: {
+          updatedAt: true,
+        },
+      },
+    },
+  });
+  if (result.length === 0) {
+    throw new Error("Your properties not available .. please add Properties.");
+  }
+  return result;
+};
+
 const updatePropertyDB = async (
   propertyId: string,
   payload: IupdateProperty,
@@ -57,6 +103,18 @@ const updatePropertyDB = async (
   }
   if (!isLandlord || property.landlordId !== landLordId) {
     throw new Error("You are not a Owner of Property!");
+  }
+  const existingProperty = await prisma.property.findFirst({
+    where: {
+      landlordId: landLordId,
+      title: payload.title,
+      location: payload.location,
+      pricePerMonth: payload.pricePerMonth,
+    },
+  });
+
+  if (existingProperty) {
+    throw new Error("This property already exists.");
   }
   const result = await prisma.property.update({
     where: {
@@ -150,6 +208,7 @@ const updateRequestDB = async (
 
 export const landlordService = {
   createPropertyDB,
+  getMyPropertyDb,
   updatePropertyDB,
   deletePropertyDB,
   getLandlordRequestsDB,

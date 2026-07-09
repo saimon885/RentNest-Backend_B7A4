@@ -6,6 +6,9 @@ export interface IcreateUser {
   password: string;
   role: Role;
 }
+export interface IupdateUser {
+  name?: string;
+}
 export interface IloginUser {
   email: string;
   password: string;

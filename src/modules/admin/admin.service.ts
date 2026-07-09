@@ -35,6 +35,11 @@ const getAllStates = async () => {
       totalProperty,
       totalCategory,
       totalRentalRequest,
+      pendingRentalRequest,
+      approvedRentalRequest,
+      completedRentalRequest,
+      totalReview,
+      totalAmountAggregate,
     ] = await Promise.all([
       await tx.users.count(),
       await tx.users.count({
@@ -55,6 +60,27 @@ const getAllStates = async () => {
       await tx.property.count(),
       await tx.category.count(),
       await tx.rentalRequest.count(),
+      await tx.rentalRequest.count({
+        where: {
+          status: "PENDING",
+        },
+      }),
+      await tx.rentalRequest.count({
+        where: {
+          status: "APPROVED",
+        },
+      }),
+      await tx.rentalRequest.count({
+        where: {
+          status: "COMPLETED",
+        },
+      }),
+      await tx.review.count(),
+      await tx.payment.aggregate({
+        _sum: {
+          amount: true,
+        },
+      }),
     ]);
     return {
       totalUsers,
@@ -64,6 +90,11 @@ const getAllStates = async () => {
       totalProperty,
       totalCategory,
       totalRentalRequest,
+      pendingRentalRequest,
+      approvedRentalRequest,
+      completedRentalRequest,
+      totalReview,
+      totalAmount: totalAmountAggregate._sum.amount,
     };
   });
   return transactionResult;
