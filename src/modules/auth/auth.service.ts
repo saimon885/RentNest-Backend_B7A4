@@ -28,6 +28,9 @@ const createUserDB = async (payload: IcreateUser) => {
       password: hashPassword,
       role,
     },
+    omit: {
+      password: true,
+    },
   });
   return user;
 };
@@ -53,7 +56,17 @@ const loginUserDB = async (payload: IloginUser) => {
   const accessToken = await jwt.sign(jwtPayload, config.jwt_access_secret, {
     expiresIn: config.jwt_access_expire_in,
   } as SignOptions);
-  return { user, accessToken };
+
+  const userData = {
+    id: user.id,
+    name: user.name,
+    eamil: user.email,
+    role: user.role,
+    isBanned: user.isBanned,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+  return { userData, accessToken };
 };
 const myProfileDB = async (userId: string) => {
   const user = await prisma.users.findUnique({
